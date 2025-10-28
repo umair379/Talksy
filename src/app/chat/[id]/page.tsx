@@ -1,0 +1,152 @@
+"use client";
+import { useEffect, useState } from "react";
+import type { Timestamp } from "firebase/firestore";
+import type { User as FirebaseUser } from "firebase/auth";
+import { db, auth } from "@/lib/firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+  where,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
+import { useParams } from "next/navigation";
+
+export interface Message {
+  id: string;
+  text: string;
+  sender: string;
+  createdAt: Timestamp;
+}
+
+export default function ChatPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id; // ✅ Type-safe conversion
+
+  const [input, setInput] = useState<string>("");
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // ✅ get current user
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsub();
+  }, []);
+
+  // ✅ find or create chat between two users
+  useEffect(() => {
+    if (!currentUser || !id) return;
+
+    const findChat = async () => {
+      const chatsRef = collection(db, "chats");
+      const q = query(
+        chatsRef,
+        where("members", "array-contains", currentUser.uid)
+      );
+      const snap = await getDocs(q);
+
+      const chatDoc = snap.docs.find((d) =>
+        (d.data().members as string[]).includes(id)
+      );
+
+      if (chatDoc) {
+        setChatId(chatDoc.id);
+      } else {
+        // create new chat
+        const newChat = await addDoc(chatsRef, {
+          members: [currentUser.uid, id],
+          createdAt: serverTimestamp(),
+        });
+        setChatId(newChat.id);
+      }
+    };
+    findChat();
+  }, [currentUser, id]);
+
+  // ✅ load messages realtime
+  useEffect(() => {
+    if (!chatId) return;
+    const msgRef = collection(db, "chats", chatId, "messages");
+    const q = query(msgRef, orderBy("createdAt", "asc"));
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      setMessages(
+        snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Message[]
+      );
+    });
+
+    return () => unsub();
+  }, [chatId]);
+
+  // ✅ send message
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim() || !chatId || !currentUser) return;
+
+    await addDoc(collection(db, "chats", chatId, "messages"), {
+      text: input,
+      sender: currentUser.uid,
+      createdAt: serverTimestamp(),
+    });
+
+    setInput("");
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-70px)] p-6 bg-gray-50">
+      <div className="flex-1 overflow-y-auto space-y-3">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${
+              msg.sender === currentUser?.uid
+                ? "justify-end"
+                : "justify-start"
+            }`}
+          >
+            <div
+              className={`px-4 py-2 rounded-2xl max-w-xs ${
+                msg.sender === currentUser?.uid
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300"
+              }`}
+            >
+              {msg.text}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Input area */}
+      <form
+        onSubmit={sendMessage}
+        className="mt-4 flex items-center gap-2 border-t pt-3"
+      >
+        <input
+          type="text"
+          placeholder="Type a message..."
+          className="flex-1 border rounded-lg px-4 py-2 outline-none"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 {
-  "name": "shopcart",
+  "name": "talksy",
   "version": "0.1.0",
+  "description": "A modern chat and social platform built with Next.js and Firebase",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,19 +10,23 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "firebase": "^12.4.0",
+    "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4"
+    "resend": "^6.2.2",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "@types/zxcvbn": "^4.4.5",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
