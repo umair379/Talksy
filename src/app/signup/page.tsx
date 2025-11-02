@@ -88,76 +88,87 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-[85vh]">
-      <h2 className="text-2xl font-bold mb-4">Signup</h2>
+    <div className="flex flex-col items-center justify-center min-h-[85vh] p-4 sm:p-6 bg-gray-900 text-gray-100">
+      <h2 className="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-700 pb-2">
+        Sign Up
+      </h2>
 
-      <input
-        type="text"
-        placeholder="First Name"
-        onChange={(e) => setFirstName(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-      <input
-        type="text"
-        placeholder="Last Name"
-        onChange={(e) => setLastName(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-      <input
-        type="text"
-        placeholder="Username"
-        onChange={(e) => setUsername(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-
-      <button
-        onClick={sendOtp}
-        className="bg-blue-500 text-white px-4 py-1 rounded mb-2"
-      >
-        {otpSent ? "Resend OTP" : "Send OTP"}
-      </button>
-
-      {otpSent && (
+      <div className="flex flex-col gap-3 w-full max-w-sm">
         <input
           type="text"
-          placeholder="Enter OTP"
-          onChange={(e) => setOtp(e.target.value)}
-          className="border p-2 mb-2 w-64 rounded"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
         />
-      )}
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+        />
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+        />
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Re-enter Password"
-        onChange={(e) => setRePassword(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
+        <button
+          onClick={sendOtp}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          {otpSent ? "Resend OTP" : "Send OTP"}
+        </button>
 
-      <button
-        onClick={handleSignup}
-        className="bg-green-500 text-white px-4 py-2 rounded w-64 mb-3"
-      >
-        Sign up
-      </button>
+        {otpSent && (
+          <input
+            type="text"
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+          />
+        )}
 
-      <button
-        onClick={() => router.push("/login")}
-        className="text-blue-600 underline"
-      >
-        Already have an account? Login
-      </button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+        />
+        <input
+          type="password"
+          placeholder="Re-enter Password"
+          value={rePassword}
+          onChange={(e) => setRePassword(e.target.value)}
+          className="border border-gray-700 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition"
+        />
+
+        <button
+          onClick={handleSignup}
+          className="bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+        >
+          Sign Up
+        </button>
+
+        <button
+          onClick={() => router.push("/login")}
+          className="text-purple-400 underline text-center mt-2"
+        >
+          Already have an account? Login
+        </button>
+      </div>
     </div>
   );
 }
