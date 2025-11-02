@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db, storage, auth } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
 
@@ -40,24 +40,6 @@ export default function ProfileForm() {
 
     fetchProfile();
   }, []);
-
-  // remove DP
-  const handleRemoveImage = async () => {
-    const user: FirebaseUser | null = auth.currentUser;
-    if (!user) return;
-
-    if (!imageUrl) return;
-
-    try {
-      const imageRef = ref(storage, `profiles/${user.uid}`);
-      await deleteObject(imageRef);
-      setImageUrl("");
-      await setDoc(doc(db, "users", user.uid), { imageUrl: "" }, { merge: true });
-    } catch (err) {
-      console.error(err);
-      alert("Failed to remove image");
-    }
-  };
 
   // save/update profile
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -114,45 +96,54 @@ export default function ProfileForm() {
     >
       <h2 className="text-2xl font-bold text-center mb-2 text-purple-400">Your Profile</h2>
 
-      {/* DP Display */}
-      <div className="flex flex-col items-center">
+      {/* DP Section */}
+      <div className="flex flex-col items-center gap-2">
         {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt="Profile"
-            width={120}
-            height={120}
-            className="rounded-full object-cover border-2 border-purple-500"
-          />
+          <>
+            <Image
+              src={imageUrl}
+              alt="Profile"
+              width={100}
+              height={100}
+              className="rounded-full object-cover w-24 h-24"
+            />
+            <div className="flex gap-2 mt-2">
+              {/* Change Picture */}
+              <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
+                Change Picture
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => setImage(e.target.files?.[0] || null)}
+                />
+              </label>
+              {/* Remove Picture */}
+              <button
+                type="button"
+                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                onClick={() => {
+                  setImage(null);
+                  setImageUrl("");
+                }}
+              >
+                Remove Picture
+              </button>
+            </div>
+          </>
         ) : (
-          <div className="w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-xl">
-            {name ? name.charAt(0) : "U"}
-          </div>
-        )}
-
-        {/* Change / Remove Buttons */}
-        <div className="flex gap-2 mt-2">
-          <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700 text-sm">
-            Change
+          // Import Picture button if no DP
+          <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
+            Import Picture
             <input
               type="file"
               className="hidden"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
             />
           </label>
-          {imageUrl && (
-            <button
-              type="button"
-              onClick={handleRemoveImage}
-              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-            >
-              Remove
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Inputs */}
+      {/* Text Inputs */}
       <input
         type="text"
         placeholder="Name"
@@ -175,6 +166,7 @@ export default function ProfileForm() {
         onChange={(e) => setNumber(e.target.value)}
       />
 
+      {/* Save Profile */}
       <button
         type="submit"
         disabled={loading}
