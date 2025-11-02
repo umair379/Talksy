@@ -24,19 +24,21 @@ export default function FriendsPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  // ✅ Auth state listener
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
-      if (u)
+      if (u) {
         setCurrentUser({
           uid: u.uid,
           email: u.email ?? "",
           name: u.displayName ?? "",
         });
-      else setCurrentUser(null);
+      } else setCurrentUser(null);
     });
     return () => unsubscribe();
   }, []);
 
+  // ✅ Fetch users from Firestore
   useEffect(() => {
     const fetchUsers = async () => {
       const querySnap = await getDocs(collection(db, "users"));
@@ -49,45 +51,41 @@ export default function FriendsPage() {
     fetchUsers();
   }, []);
 
-  const sendRequest = async (id: string) => {
+  // ✅ Send friend request
+  const sendRequest = async (targetUid: string) => {
     if (!currentUser) return alert("Please login first!");
-    if (id === currentUser.uid) return;
+    if (targetUid === currentUser.uid) return;
 
-    const targetUser = users.find((u) => u.uid === id);
+    const targetUser = users.find((u) => u.uid === targetUid);
 
-    const hasSentRequest = currentUser?.sentRequests?.includes(id) ?? false;
-    const hasReceivedRequest =
-      targetUser?.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
+    const hasSentRequest = currentUser.sentRequests?.includes(targetUid) ?? false;
+    const hasReceivedRequest = targetUser?.sentRequests?.includes(currentUser.uid) ?? false;
 
     if (hasSentRequest)
-      return alert(
-        "You have already sent a friend request to this user!"
-      );
+      return alert("You have already sent a friend request to this user!");
     if (hasReceivedRequest)
-      return alert(
-        "This user has already sent you a friend request. Please check your notifications!"
-      );
+      return alert("This user has already sent you a friend request. Please check your notifications!");
 
-    // Add to 'friendRequests' collection
+    // Add friend request in Firestore
     await addDoc(collection(db, "friendRequests"), {
       from: currentUser.uid,
-      to: id,
+      to: targetUid,
       status: "pending",
     });
 
     // Update sender’s sentRequests
     const currentUserRef = doc(db, "users", currentUser.uid);
     await updateDoc(currentUserRef, {
-      sentRequests: arrayUnion(id),
+      sentRequests: arrayUnion(targetUid),
     });
 
     alert("Friend request sent!");
 
-    // Local state update for immediate UI change
+    // Update local state for immediate UI
     setUsers((prev) =>
       prev.map((u) =>
         u.uid === currentUser.uid
-          ? { ...u, sentRequests: [...(u.sentRequests ?? []), id] }
+          ? { ...u, sentRequests: [...(u.sentRequests ?? []), targetUid] }
           : u
       )
     );
@@ -103,8 +101,7 @@ export default function FriendsPage() {
           .filter((u) => u.uid !== currentUser?.uid)
           .map((u) => {
             const hasSentRequest = currentUser?.sentRequests?.includes(u.uid) ?? false;
-            const hasReceivedRequest =
-              u.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
+            const hasReceivedRequest = u.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
 
             return (
               <div
