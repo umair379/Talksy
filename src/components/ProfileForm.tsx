@@ -11,7 +11,6 @@ export default function ProfileForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Yahan apna submit logic likho, jaise firebase me update
     console.log("Name:", name);
     console.log("Email:", email);
     console.log("Profile Pic:", profilePic);
@@ -26,7 +25,7 @@ export default function ProfileForm() {
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-semibold mb-4">
-        👤 Profile
+        Profile
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
