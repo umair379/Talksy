@@ -115,7 +115,7 @@ export default function SearchPage() {
       <div className="mt-4">
         {results.length === 0 && !loading && searchTerm.trim() ? (
           <p className="text-gray-400">
-            No users found matching &quot;{searchTerm}&quot;
+            {`No users found matching "${searchTerm}"`}
           </p>
         ) : (
           <ul className="space-y-3">
