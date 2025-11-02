@@ -33,7 +33,6 @@ export default function SearchPage() {
     const usersRef = collection(db, "users");
     const term = searchTerm.toLowerCase().trim();
 
-    // Prefix search by name and username
     const qName = query(
       usersRef,
       where("name", ">=", term),
