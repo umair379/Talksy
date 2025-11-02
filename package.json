@@ -15,7 +15,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "resend": "^6.2.2",
-    "zxcvbn": "^4.4.2"
+    "zxcvbn": "^4.4.2",
+    "react-icons": "^4.11.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
