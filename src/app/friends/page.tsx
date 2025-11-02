@@ -26,7 +26,12 @@ export default function FriendsPage() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
-      if (u) setCurrentUser({ uid: u.uid, email: u.email!, name: u.displayName || "" });
+      if (u)
+        setCurrentUser({
+          uid: u.uid,
+          email: u.email ?? "",
+          name: u.displayName ?? "",
+        });
       else setCurrentUser(null);
     });
     return () => unsubscribe();
@@ -48,13 +53,20 @@ export default function FriendsPage() {
     if (!currentUser) return alert("Please login first!");
     if (id === currentUser.uid) return;
 
-    const targetUser = users.find(u => u.uid === id);
+    const targetUser = users.find((u) => u.uid === id);
 
     const hasSentRequest = currentUser?.sentRequests?.includes(id) ?? false;
-    const hasReceivedRequest = targetUser?.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
+    const hasReceivedRequest =
+      targetUser?.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
 
-    if (hasSentRequest) return alert("You have already sent a friend request to this user!");
-    if (hasReceivedRequest) return alert("This user has already sent you a friend request. Please check your notifications!");
+    if (hasSentRequest)
+      return alert(
+        "You have already sent a friend request to this user!"
+      );
+    if (hasReceivedRequest)
+      return alert(
+        "This user has already sent you a friend request. Please check your notifications!"
+      );
 
     // Add to 'friendRequests' collection
     await addDoc(collection(db, "friendRequests"), {
@@ -72,9 +84,13 @@ export default function FriendsPage() {
     alert("Friend request sent!");
 
     // Local state update for immediate UI change
-    setUsers(prev => prev.map(u => 
-        u.uid === currentUser.uid ? { ...u, sentRequests: [...(u.sentRequests || []), id] } : u
-    ));
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.uid === currentUser.uid
+          ? { ...u, sentRequests: [...(u.sentRequests ?? []), id] }
+          : u
+      )
+    );
   };
 
   return (
@@ -86,36 +102,44 @@ export default function FriendsPage() {
         {users
           .filter((u) => u.uid !== currentUser?.uid)
           .map((u) => {
-              const hasSentRequest = currentUser?.sentRequests?.includes(u.uid) ?? false;
-              const hasReceivedRequest = u.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
+            const hasSentRequest = currentUser?.sentRequests?.includes(u.uid) ?? false;
+            const hasReceivedRequest =
+              u.sentRequests?.includes(currentUser?.uid ?? "") ?? false;
 
-              return (
-            <div
-              key={u.uid}
-              className="p-4 border border-gray-700 rounded-lg flex justify-between items-center bg-gray-800 text-gray-100 shadow-xl transition hover:bg-purple-900/50"
-            >
-              <div>
-                <h2 className="font-semibold text-lg text-purple-300">{u.name || "No Name"}</h2>
-                <p className="text-sm text-gray-400">{u.email}</p>
-                {u.about && (
-                    <p className="text-xs text-gray-500 mt-1 hidden sm:block">
-                        {u.about}
-                    </p>
-                )}
-              </div>
-              <button
-                onClick={() => sendRequest(u.uid)}
-                disabled={hasSentRequest || hasReceivedRequest}
-                className={`px-3 py-1 rounded transition text-sm font-medium ${
-                    hasSentRequest || hasReceivedRequest
-                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
-                }`}
+            return (
+              <div
+                key={u.uid}
+                className="p-4 border border-gray-700 rounded-lg flex justify-between items-center bg-gray-800 text-gray-100 shadow-xl transition hover:bg-purple-900/50"
               >
-                {hasSentRequest ? "Request Sent" : hasReceivedRequest ? "Respond" : "Add Friend"}
-              </button>
-            </div>
-          )})}
+                <div>
+                  <h2 className="font-semibold text-lg text-purple-300">
+                    {u.name || "No Name"}
+                  </h2>
+                  <p className="text-sm text-gray-400">{u.email}</p>
+                  {u.about && (
+                    <p className="text-xs text-gray-500 mt-1 hidden sm:block">
+                      {u.about}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => sendRequest(u.uid)}
+                  disabled={hasSentRequest || hasReceivedRequest}
+                  className={`px-3 py-1 rounded transition text-sm font-medium ${
+                    hasSentRequest || hasReceivedRequest
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-purple-600 text-white hover:bg-purple-700"
+                  }`}
+                >
+                  {hasSentRequest
+                    ? "Request Sent"
+                    : hasReceivedRequest
+                    ? "Respond"
+                    : "Add Friend"}
+                </button>
+              </div>
+            );
+          })}
       </div>
     </div>
   );
