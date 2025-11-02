@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
-import { FaUser } from "react-icons/fa6"; // latest react-icons import
+import { FaUser } from "react-icons";; // latest react-icons import
 
 export default function ProfileForm() {
   const [name, setName] = useState("");
