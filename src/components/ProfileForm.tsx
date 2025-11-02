@@ -13,6 +13,7 @@ export default function ProfileForm() {
   const [number, setNumber] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(""); // ✅ Preview URL
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -30,6 +31,7 @@ export default function ProfileForm() {
           setAbout(data.about || "");
           setNumber(data.number || "");
           setImageUrl(data.imageUrl || "");
+          setPreviewUrl(data.imageUrl || ""); // preview initial
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -41,7 +43,19 @@ export default function ProfileForm() {
     fetchProfile();
   }, []);
 
-  // save/update profile
+  // update preview when user selects a new image
+  useEffect(() => {
+    if (image) {
+      const url = URL.createObjectURL(image);
+      setPreviewUrl(url);
+
+      // cleanup
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(imageUrl); // if no new image, show saved one
+    }
+  }, [image, imageUrl]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -83,7 +97,6 @@ export default function ProfileForm() {
     setLoading(false);
   };
 
-  // Remove profile picture
   const handleRemovePicture = async () => {
     try {
       const user: FirebaseUser | null = auth.currentUser;
@@ -97,6 +110,7 @@ export default function ProfileForm() {
       await setDoc(doc(db, "users", user.uid), { imageUrl: "" }, { merge: true });
       setImage(null);
       setImageUrl("");
+      setPreviewUrl("");
       alert("Profile picture removed!");
     } catch (err) {
       console.error(err);
@@ -121,18 +135,17 @@ export default function ProfileForm() {
 
       {/* DP Section */}
       <div className="flex flex-col items-center gap-2">
-        {imageUrl ? (
+        {previewUrl ? (
           <>
             <div className="w-28 h-28 relative">
               <Image
-                src={imageUrl}
+                src={previewUrl}
                 alt="Profile"
                 fill
                 className="rounded-full object-cover"
               />
             </div>
             <div className="flex gap-2 mt-2">
-              {/* Change Picture */}
               <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
                 Change Picture
                 <input
@@ -141,7 +154,6 @@ export default function ProfileForm() {
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
                 />
               </label>
-              {/* Remove Picture */}
               <button
                 type="button"
                 className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -186,7 +198,6 @@ export default function ProfileForm() {
         onChange={(e) => setNumber(e.target.value)}
       />
 
-      {/* Save Profile */}
       <button
         type="submit"
         disabled={loading}
