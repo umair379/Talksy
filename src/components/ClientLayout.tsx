@@ -41,16 +41,19 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100 text-gray-800">
+      // 🎨 Theme Change: Darker loading screen
+      <div className="flex items-center justify-center h-screen bg-gray-900 text-purple-400">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-100 text-gray-900 min-h-screen">
+    // 🎨 Theme Change: Dark background, light text. Added `min-h-screen`
+    <div className="bg-[#121212] text-gray-100 min-h-screen">
       <Navbar />
-      <main className="max-w-4xl mx-auto p-4">{children}</main>
+      {/* 📱 Responsiveness: Increased max-width for larger screens, maintained padding */}
+      <main className="max-w-6xl mx-auto p-4 sm:p-6">{children}</main>
     </div>
   );
 }
