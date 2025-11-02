@@ -14,6 +14,7 @@ interface UserProfile {
 
 export default function UserProfile({ params }: { params: { id: string } }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -32,23 +33,22 @@ export default function UserProfile({ params }: { params: { id: string } }) {
 
   return (
     <div className="p-6 max-w-md mx-auto bg-gray-900 text-gray-100 rounded-lg shadow-lg">
-      {user.imageUrl ? (
-        <div className="flex justify-center">
+      <div className="flex justify-center">
+        {user.imageUrl ? (
           <Image
             src={user.imageUrl}
             alt={`${user.name || "User"} profile`}
             width={120}
             height={120}
-            className="rounded-full border-2 border-purple-500"
+            className="rounded-full border-2 border-purple-500 cursor-pointer"
+            onClick={() => setShowModal(true)}
           />
-        </div>
-      ) : (
-        <div className="flex justify-center">
+        ) : (
           <div className="w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-xl">
             {user.name ? user.name.charAt(0) : "U"}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <h1 className="text-2xl font-bold mt-4 text-purple-400 text-center">
         {user.name || "No Name"}
@@ -60,6 +60,22 @@ export default function UserProfile({ params }: { params: { id: string } }) {
 
       {user.number && (
         <p className="mt-2 text-gray-400 text-center">📞 {user.number}</p>
+      )}
+
+      {/* Modal for Enlarged DP */}
+      {showModal && user.imageUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+          onClick={() => setShowModal(false)}
+        >
+          <Image
+            src={user.imageUrl}
+            alt="Enlarged profile"
+            width={300}
+            height={300}
+            className="rounded-full object-cover"
+          />
+        </div>
       )}
     </div>
   );
