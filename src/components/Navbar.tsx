@@ -5,17 +5,19 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { MoreVertical } from "lucide-react"; // 📦 for three-dot icon
 
 export default function Navbar() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-  const unsub = onAuthStateChanged(auth, (currentUser) => {
-    setUser(currentUser);
-  });
-  return () => unsub();
-}, []);
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsub();
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -24,11 +26,9 @@ export default function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    // 🎨 Theme Change: Black background for Navbar
-    // 📱 Responsiveness: Use flex-wrap on small screens if necessary
-    <nav className="bg-gray-900 text-white px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center">
+    <nav className="bg-gray-900 text-white px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center relative">
+      {/* Left Side */}
       <div className="flex space-x-2 sm:space-x-4 items-center">
-        {/* 🎨 Theme Change: Purple highlight for app name */}
         {user ? (
           <span className="font-extrabold text-xl text-purple-400 cursor-default select-none">
             Talksy
@@ -46,7 +46,7 @@ export default function Navbar() {
           </Link>
         )}
 
-        {/* 📱 Responsiveness: Hide links on very small screens, display in a row on sm and up */}
+        {/* Main Navbar Links */}
         {user && (
           <div className="hidden sm:flex space-x-1 sm:space-x-2">
             <Link
@@ -61,6 +61,17 @@ export default function Navbar() {
             </Link>
 
             <Link
+              href="/friends"
+              className={`px-3 py-1 rounded-lg transition text-sm ${
+                isActive("/friends")
+                  ? "bg-purple-600 text-white font-semibold"
+                  : "hover:bg-purple-600/40"
+              }`}
+            >
+              Friends
+            </Link>
+
+            <Link
               href="/groups"
               className={`px-3 py-1 rounded-lg transition text-sm ${
                 isActive("/groups")
@@ -69,17 +80,6 @@ export default function Navbar() {
               }`}
             >
               Groups
-            </Link>
-
-            <Link
-              href="/create-group"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/create-group")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Create Group
             </Link>
 
             <Link
@@ -92,11 +92,73 @@ export default function Navbar() {
             >
               Search
             </Link>
+
+            <Link
+              href="/profile"
+              className={`px-3 py-1 rounded-lg transition text-sm ${
+                isActive("/profile")
+                  ? "bg-purple-600 text-white font-semibold"
+                  : "hover:bg-purple-600/40"
+              }`}
+            >
+              Profile
+            </Link>
+
+            {/* Three Dots Dropdown Trigger */}
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="px-2 py-1 rounded-lg hover:bg-purple-600/40 transition"
+              >
+                <MoreVertical size={18} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-40 z-20">
+                  <Link
+                    href="/requests"
+                    className={`block px-4 py-2 text-sm rounded-t-lg ${
+                      isActive("/requests")
+                        ? "bg-purple-600 text-white font-semibold"
+                        : "hover:bg-purple-600/40"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Requests
+                  </Link>
+
+                  <Link
+                    href="/users"
+                    className={`block px-4 py-2 text-sm rounded-b-lg ${
+                      isActive("/users")
+                        ? "bg-purple-600 text-white font-semibold"
+                        : "hover:bg-purple-600/40"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Users
+                  </Link>
+
+                  <Link
+                    href="/create-group"
+                    className={`block px-4 py-2 text-sm ${
+                      isActive("/create-group")
+                        ? "bg-purple-600 text-white font-semibold"
+                        : "hover:bg-purple-600/40"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Create Group
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* 隼 Right side buttons */}
+      {/* Right Side */}
       <div className="flex space-x-2 mt-2 sm:mt-0">
         {user ? (
           <button
@@ -131,7 +193,7 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* 📱 Responsive Mobile Menu: Show links below App Name on small screens */}
+      {/* Mobile Menu */}
       {user && (
         <div className="flex flex-wrap sm:hidden justify-center w-full space-x-2 mt-3">
           <Link
@@ -145,6 +207,16 @@ export default function Navbar() {
             Chat
           </Link>
           <Link
+            href="/friends"
+            className={`px-3 py-1 rounded-lg transition text-sm ${
+              isActive("/friends")
+                ? "bg-purple-600 text-white font-semibold"
+                : "hover:bg-purple-600/40"
+            }`}
+          >
+            Friends
+          </Link>
+          <Link
             href="/groups"
             className={`px-3 py-1 rounded-lg transition text-sm ${
               isActive("/groups")
@@ -155,19 +227,18 @@ export default function Navbar() {
             Groups
           </Link>
           <Link
-            href="/search"
+            href="/profile"
             className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/search")
+              isActive("/profile")
                 ? "bg-purple-600 text-white font-semibold"
                 : "hover:bg-purple-600/40"
             }`}
           >
-            Search
+            Profile
           </Link>
-          {/* Added 'Create Group' on the second line for better spacing */}
           <Link
             href="/create-group"
-            className={`px-3 py-1 rounded-lg transition text-sm mt-1 ${
+            className={`px-3 py-1 rounded-lg transition text-sm ${
               isActive("/create-group")
                 ? "bg-purple-600 text-white font-semibold"
                 : "hover:bg-purple-600/40"
