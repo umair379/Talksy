@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
-import { FaUser } from "react-icons";; // latest react-icons import
 
 export default function ProfileForm() {
   const [name, setName] = useState("");
@@ -26,8 +25,8 @@ export default function ProfileForm() {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-        <FaUser className="text-blue-500" /> Profile
+      <h2 className="text-2xl font-semibold mb-4">
+        Profile
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
