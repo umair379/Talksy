@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db, storage, auth } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
 
@@ -48,16 +48,18 @@ export default function ProfileForm() {
 
     try {
       const user: FirebaseUser | null = auth.currentUser;
-      if (!user) return alert("Please login first!");
+      if (!user) throw new Error("Please login first!");
 
       let finalImageUrl = imageUrl;
 
+      // Upload new image if selected
       if (image) {
         const imageRef = ref(storage, `profiles/${user.uid}`);
         await uploadBytes(imageRef, image);
         finalImageUrl = await getDownloadURL(imageRef);
       }
 
+      // Update Firestore
       await setDoc(
         doc(db, "users", user.uid),
         {
@@ -71,14 +73,35 @@ export default function ProfileForm() {
       );
 
       alert("Profile saved successfully!");
-      setImage(null);
       setImageUrl(finalImageUrl);
+      setImage(null);
     } catch (err) {
       console.error(err);
-      alert("Error saving profile");
+      alert(err instanceof Error ? err.message : "Error saving profile");
     }
 
     setLoading(false);
+  };
+
+  // Remove profile picture
+  const handleRemovePicture = async () => {
+    try {
+      const user: FirebaseUser | null = auth.currentUser;
+      if (!user) throw new Error("Please login first!");
+
+      if (imageUrl) {
+        const imageRef = ref(storage, `profiles/${user.uid}`);
+        await deleteObject(imageRef);
+      }
+
+      await setDoc(doc(db, "users", user.uid), { imageUrl: "" }, { merge: true });
+      setImage(null);
+      setImageUrl("");
+      alert("Profile picture removed!");
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Error removing picture");
+    }
   };
 
   if (initialLoading) {
@@ -100,13 +123,14 @@ export default function ProfileForm() {
       <div className="flex flex-col items-center gap-2">
         {imageUrl ? (
           <>
-            <Image
-              src={imageUrl}
-              alt="Profile"
-              width={100}
-              height={100}
-              className="rounded-full object-cover w-24 h-24"
-            />
+            <div className="w-28 h-28 relative">
+              <Image
+                src={imageUrl}
+                alt="Profile"
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
             <div className="flex gap-2 mt-2">
               {/* Change Picture */}
               <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
@@ -121,17 +145,13 @@ export default function ProfileForm() {
               <button
                 type="button"
                 className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                onClick={() => {
-                  setImage(null);
-                  setImageUrl("");
-                }}
+                onClick={handleRemovePicture}
               >
                 Remove Picture
               </button>
             </div>
           </>
         ) : (
-          // Import Picture button if no DP
           <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
             Import Picture
             <input
