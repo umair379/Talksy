@@ -104,7 +104,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-70px)] p-6 bg-gray-50">
+    // 🎨 Theme Change: Dark background for chat area
+    // 📱 Responsiveness: Full height to fill the screen space
+    <div className="flex flex-col h-[calc(100vh-70px)] p-4 sm:p-6 bg-gray-900 rounded-xl shadow-inner">
       <div className="flex-1 overflow-y-auto space-y-3">
         {messages.map((msg) => (
           <div
@@ -116,10 +118,12 @@ export default function ChatPage() {
             }`}
           >
             <div
-              className={`px-4 py-2 rounded-2xl max-w-xs ${
+              // 📱 Responsiveness: max-w-[80%] for mobile, max-w-lg for desktop
+              // 🎨 Theme Change: Purple for sender, Dark Gray for receiver
+              className={`px-4 py-2 rounded-2xl max-w-[80%] sm:max-w-lg text-wrap ${
                 msg.sender === currentUser?.uid
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                  ? "bg-purple-600 text-white" // Sender: Purple
+                  : "bg-gray-700 text-gray-100" // Receiver: Dark Gray
               }`}
             >
               {msg.text}
@@ -131,18 +135,21 @@ export default function ChatPage() {
       {/* Input area */}
       <form
         onSubmit={sendMessage}
-        className="mt-4 flex items-center gap-2 border-t pt-3"
+        // 🎨 Theme Change: Dark border top for separation
+        className="mt-4 flex items-center gap-2 border-t border-gray-700 pt-3"
       >
         <input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 border rounded-lg px-4 py-2 outline-none"
+          // 🎨 Theme Change: Dark input field, purple focus ring
+          className="flex-1 border border-gray-700 rounded-lg px-4 py-2 outline-none bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          // 🎨 Theme Change: Purple send button
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
         >
           Send
         </button>
