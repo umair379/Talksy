@@ -22,7 +22,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       let email = input;
-      // agar input email nahi hai, username consider karo
       if (!input.includes("@")) {
         const q = query(collection(db, "users"), where("username", "==", input));
         const snap = await getDocs(q);
@@ -41,40 +40,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-[85vh]">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 sm:px-0">
+      <div className="w-full max-w-sm p-6 bg-gray-800 text-gray-100 rounded-xl shadow-xl">
+        <h2 className="text-2xl font-bold mb-6 text-purple-400 text-center border-b border-gray-700 pb-2">
+          Login
+        </h2>
 
-      <input
-        type="text"
-        placeholder="Email or Username"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 mb-2 w-64 rounded"
-      />
+        <input
+          type="text"
+          placeholder="Email or Username"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="border border-gray-600 p-3 mb-4 w-full rounded bg-gray-900 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-purple-400"
+        />
 
-      <button
-        onClick={handleLogin}
-        disabled={loading}
-        className={`${
-          loading ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
-        } text-white px-4 py-2 rounded w-64 mb-3`}
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border border-gray-600 p-3 mb-4 w-full rounded bg-gray-900 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-purple-400"
+        />
 
-      <button
-        onClick={() => router.push("/signup")}
-        className="text-blue-600 underline"
-      >
-        Don’t have an account? Sign up
-      </button>
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          className={`w-full py-3 mb-4 rounded font-medium transition ${
+            loading
+              ? "bg-gray-600 cursor-not-allowed text-gray-400"
+              : "bg-purple-600 hover:bg-purple-700 text-white"
+          }`}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        <button
+          onClick={() => router.push("/signup")}
+          className="w-full text-center text-blue-500 hover:text-blue-400 underline"
+        >
+          Don’t have an account? Sign up
+        </button>
+      </div>
     </div>
   );
 }
