@@ -1,21 +1,18 @@
 @import "tailwindcss";
 
+/* 🎨 Theme Change: Black and Light Purple */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Default: Dark Theme (Black/Dark Grey Background) */
+  --background: #121212; /* Very Dark Background */
+  --foreground: #e0e0e0; /* Light Text Color */
+  --purple-main: #9333ea; /* A vibrant purple for highlights/accents */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Agar user ki preference dark hai, toh same theme use karein ya aur dark kar dein */
+    --background: #0a0a0a; 
+    --foreground: #f5f5f5;
   }
 }
 
@@ -23,4 +20,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* Yeh CSS properties responsive design ko directly affect nahi karti, 
+     lekin humne isse dark theme ke liye adjust kar diya hai */
 }
