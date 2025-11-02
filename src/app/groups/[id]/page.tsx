@@ -69,43 +69,63 @@ export default function GroupChatPage() {
     setText("");
   };
 
-  if (loading) return <p className="text-center mt-10 text-gray-600">Loading chat...</p>;
+  // 🎨 Theme Change: Loading text color to purple
+  if (loading) return <p className="text-center mt-10 text-purple-400">Loading chat...</p>;
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto">
-      <div className="bg-blue-600 text-white py-3 px-4 flex justify-between items-center shadow">
-        <h1 className="text-lg font-bold">Group Chat 💬</h1>
-        <a href={`/groups/${groupId}/manage`} className="underline text-sm">Manage Group</a>
+    // 📱 Responsiveness: Defined height to fit screen, centered container, dark background
+    <div className="flex flex-col h-[calc(100vh-70px)] max-w-2xl mx-auto bg-gray-900 rounded-xl shadow-2xl border border-gray-800">
+      
+      {/* 🎨 Theme Change: Dark header, purple title */}
+      <div className="bg-gray-800 text-white py-3 px-4 flex justify-between items-center shadow-lg border-b border-gray-700 rounded-t-xl">
+        <h1 className="text-lg font-bold text-purple-400">Group Chat 💬</h1>
+        <a 
+            href={`/groups/${groupId}/manage`} 
+            className="text-sm text-purple-400 hover:text-purple-300 underline"
+        >
+            Manage Group
+        </a>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
+      {/* 🎨 Theme Change: Dark chat area background */}
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-900 space-y-3">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`mb-2 flex ${msg.sender === user?.email ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`px-4 py-2 rounded-2xl shadow text-sm max-w-[70%] ${
-                msg.sender === user?.email ? "bg-blue-500 text-white" : "bg-white text-gray-800"
+              // 📱 Responsiveness: max-w-[80%] for better mobile fit
+              className={`px-4 py-2 rounded-2xl shadow text-sm max-w-[80%] sm:max-w-[70%] ${
+                msg.sender === user?.email 
+                  ? "bg-purple-600 text-white" // Sender: Purple
+                  : "bg-gray-700 text-gray-100" // Receiver: Dark Gray
               }`}
             >
               <p>{msg.text}</p>
-              <span className="text-[10px] opacity-60 block mt-1">{msg.sender}</span>
+              {/* 🎨 Theme Change: Lighter opacity for sender tag on dark background */}
+              <span className="text-[10px] text-gray-400 block mt-1">~ {msg.sender}</span>
             </div>
           </div>
         ))}
         <div ref={chatEndRef} />
       </div>
 
-      <div className="flex p-3 bg-white border-t">
+      {/* 🎨 Theme Change: Dark input bar, dark border top */}
+      <div className="flex p-3 bg-gray-900 border-t border-gray-700">
         <input
           type="text"
           value={text}
           placeholder="Type a message..."
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 border rounded-full px-4 py-2 focus:outline-none"
+          // 🎨 Theme Change: Dark input style, purple focus ring
+          className="flex-1 border border-gray-700 rounded-full px-4 py-2 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
-        <button onClick={handleSend} className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-full">
+        <button 
+            onClick={handleSend} 
+            // 🎨 Theme Change: Purple send button
+            className="ml-2 bg-purple-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-purple-700 transition"
+        >
           Send
         </button>
       </div>
