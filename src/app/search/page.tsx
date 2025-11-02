@@ -1,117 +1,104 @@
 "use client";
+import { useState, useEffect } from "react";
+import { createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { collection, addDoc } from "firebase/firestore";
 
-import { useEffect, useState } from "react";
-import { db, auth } from "@/lib/firebase";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
-import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-
-interface User {
-  uid: string;
-  name?: string;
-  username?: string;
-  email?: string;
-}
-
-export default function SearchPage() {
-  const [me, setMe] = useState<FirebaseUser | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults] = useState<User[]>([]);
+export default function SignupPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, setMe);
+    const unsub = onAuthStateChanged(auth, (user: FirebaseUser | null) => {
+      if (user) router.replace("/chat");
+    });
     return () => unsub();
-  }, []);
+  }, [router]);
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+  const handleSignup = async () => {
+    if (!username || !email || !password) return alert("Please fill all fields");
     setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    const usersRef = collection(db, "users");
+      // Update displayName
+      await updateProfile(user, { displayName: username });
 
-    // 1️⃣ Search by name
-    const qName = query(
-      usersRef,
-      where("name", ">=", searchTerm),
-      where("name", "<=", searchTerm + "\uf8ff")
-    );
+      // Add user to Firestore
+      await addDoc(collection(db, "users"), {
+        uid: user.uid,
+        username,
+        email,
+        friends: [],
+        sentRequests: [],
+        about: "",
+      });
 
-    // 2️⃣ Search by username
-    const qUsername = query(
-      usersRef,
-      where("username", ">=", searchTerm),
-      where("username", "<=", searchTerm + "\uf8ff")
-    );
-
-    // Run both queries
-    const [snapName, snapUsername] = await Promise.all([getDocs(qName), getDocs(qUsername)]);
-
-    // Merge results and remove duplicates
-    const merged: Record<string, User> = {};
-    [...snapName.docs, ...snapUsername.docs].forEach((d) => {
-      if (d.id !== me?.uid) {
-        merged[d.id] = { uid: d.id, ...(d.data() as Omit<User, "uid">) };
-      }
-    });
-
-    setResults(Object.values(merged));
-    setLoading(false);
-  };
-
-  const sendRequest = async (toId: string) => {
-    if (!me) return alert("Please login first");
-    await addDoc(collection(db, "friendRequests"), {
-      from: me.uid,
-      to: toId,
-      status: "pending",
-      createdAt: new Date(),
-    });
-    alert("Friend request sent!");
+      alert("Account created successfully!");
+      router.replace("/chat");
+    } catch (err: unknown) {
+      if (err instanceof Error) alert(err.message);
+      else alert("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Search Users</h2>
+    <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 sm:px-0">
+      <div className="w-full max-w-sm p-6 bg-gray-800 text-gray-100 rounded-xl shadow-xl">
+        <h2 className="text-2xl font-bold mb-6 text-purple-400 text-center border-b border-gray-700 pb-2">
+          Sign Up
+        </h2>
 
-      <div className="flex gap-2 mb-4">
         <input
           type="text"
-          placeholder="Search by name or username..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border p-2 rounded w-full"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="border border-gray-600 p-3 mb-4 w-full rounded bg-gray-900 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-purple-400"
         />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border border-gray-600 p-3 mb-4 w-full rounded bg-gray-900 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-purple-400"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border border-gray-600 p-3 mb-4 w-full rounded bg-gray-900 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-purple-400"
+        />
+
         <button
-          onClick={handleSearch}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={handleSignup}
+          disabled={loading}
+          className={`w-full py-3 mb-4 rounded font-medium transition ${
+            loading
+              ? "bg-gray-600 cursor-not-allowed text-gray-400"
+              : "bg-purple-600 hover:bg-purple-700 text-white"
+          }`}
         >
-          {loading ? "Searching..." : "Search"}
+          {loading ? "Creating account..." : "Sign Up"}
+        </button>
+
+        <button
+          onClick={() => router.push("/login")}
+          className="w-full text-center text-blue-500 hover:text-blue-400 underline"
+        >
+          Already have an account? Login
         </button>
       </div>
-
-      {results.length === 0 ? (
-        <p>No users found</p>
-      ) : (
-        <ul className="space-y-3">
-          {results.map((u) => (
-            <li
-              key={u.uid}
-              className="flex justify-between items-center bg-white p-3 rounded shadow-sm"
-            >
-              <div>
-                <div className="font-medium">{u.name || u.username}</div>
-                <div className="text-sm text-gray-500">{u.email}</div>
-              </div>
-              <button
-                onClick={() => sendRequest(u.uid)}
-                className="bg-green-500 text-white px-3 py-1 rounded"
-              >
-                Add Friend
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
