@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 
 interface User {
@@ -18,11 +27,36 @@ export default function SearchPage() {
   const [results, setResults] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [requests, setRequests] = useState<Record<string, string>>({}); // {toUserId: status}
+
+  // Auth listener
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, setMe);
     return () => unsub();
   }, []);
 
+  // Real-time listener for friend requests sent by me
+  useEffect(() => {
+    if (!me) return;
+
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", me.uid)
+    );
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const reqs: Record<string, string> = {};
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        reqs[data.to] = data.status;
+      });
+      setRequests(reqs);
+    });
+
+    return () => unsub();
+  }, [me]);
+
+  // Search users
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
       setResults([]);
@@ -73,16 +107,32 @@ export default function SearchPage() {
     setLoading(false);
   };
 
+  // Send friend request
   const sendRequest = async (toId: string) => {
-    if (!me) return alert("Please log in to send a request.");
-
+    if (!me) return alert("Please log in first!");
     await addDoc(collection(db, "friendRequests"), {
       from: me.uid,
       to: toId,
       status: "pending",
       createdAt: new Date(),
     });
-    alert("Friend request sent!");
+  };
+
+  // Cancel friend request
+  const cancelRequest = async (toId: string) => {
+    if (!me) return;
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", me.uid),
+      where("to", "==", toId),
+      where("status", "==", "pending")
+    );
+    const snap = await getDocs(q);
+    snap.docs.forEach(async (docSnap) => {
+      await updateDoc(doc(db, "friendRequests", docSnap.id), {
+        status: "cancelled",
+      });
+    });
   };
 
   return (
@@ -119,25 +169,41 @@ export default function SearchPage() {
           </p>
         ) : (
           <ul className="space-y-3">
-            {results.map((u) => (
-              <li
-                key={u.uid}
-                className="flex justify-between items-center border border-gray-700 p-3 rounded-lg bg-gray-800 text-gray-100 shadow-lg transition hover:bg-purple-900/50"
-              >
-                <div>
-                  <div className="font-medium text-purple-300">
-                    {u.name || u.username || "No Name"}
-                  </div>
-                  <div className="text-sm text-gray-400">{u.email}</div>
-                </div>
-                <button
-                  onClick={() => sendRequest(u.uid)}
-                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition text-sm flex-shrink-0"
+            {results.map((u) => {
+              const status = requests[u.uid]; // pending / accepted / cancelled
+
+              return (
+                <li
+                  key={u.uid}
+                  className="flex justify-between items-center border border-gray-700 p-3 rounded-lg bg-gray-800 text-gray-100 shadow-lg transition hover:bg-purple-900/50"
                 >
-                  Send Request
-                </button>
-              </li>
-            ))}
+                  <div>
+                    <div className="font-medium text-purple-300">
+                      {u.name || u.username || "No Name"}
+                    </div>
+                    <div className="text-sm text-gray-400">{u.email}</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!status || status === "cancelled") {
+                        sendRequest(u.uid);
+                      } else if (status === "pending") {
+                        if (confirm("Cancel the request?")) {
+                          cancelRequest(u.uid);
+                        }
+                      }
+                    }}
+                    className={`px-3 py-1 rounded ${
+                      status === "pending"
+                        ? "bg-gray-500 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    {status === "pending" ? "Requesting…" : "Send Request"}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
