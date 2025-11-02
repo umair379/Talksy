@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
+import { FaUser } from "react-icons/fa"; // person icon
 
 export default function ProfileForm() {
   const [name, setName] = useState("");
@@ -57,7 +58,7 @@ export default function ProfileForm() {
     }
   }, [image, imageUrl]);
 
-  // function to automatically save profile
+  // automatic save function
   const autoSaveProfile = async (newImage: File | null = null) => {
     setSaving(true);
     try {
@@ -97,7 +98,7 @@ export default function ProfileForm() {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
       autoSaveProfile();
-    }, 1000); // save 1 sec after last keystroke
+    }, 1000);
   };
 
   // handle image change
@@ -141,36 +142,39 @@ export default function ProfileForm() {
 
       {/* DP Section */}
       <div className="flex flex-col items-center gap-2">
+        <div className="w-28 h-28 relative rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-gray-400 text-3xl">
+          {previewUrl ? (
+            <Image
+              src={previewUrl}
+              alt="Profile"
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <FaUser />
+          )}
+        </div>
+
         {previewUrl ? (
-          <>
-            <div className="w-28 h-28 relative">
-              <Image
-                src={previewUrl}
-                alt="Profile"
-                fill
-                className="rounded-full object-cover"
+          <div className="flex gap-2 mt-2">
+            <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
+              Change Picture
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => handleImageChange(e.target.files?.[0] || null)}
               />
-            </div>
-            <div className="flex gap-2 mt-2">
-              <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
-                Change Picture
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => handleImageChange(e.target.files?.[0] || null)}
-                />
-              </label>
-              <button
-                type="button"
-                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                onClick={handleRemovePicture}
-              >
-                Remove Picture
-              </button>
-            </div>
-          </>
+            </label>
+            <button
+              type="button"
+              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+              onClick={handleRemovePicture}
+            >
+              Remove Picture
+            </button>
+          </div>
         ) : (
-          <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700">
+          <label className="bg-purple-600 text-white px-3 py-1 rounded cursor-pointer hover:bg-purple-700 mt-2">
             Import Picture
             <input
               type="file"
