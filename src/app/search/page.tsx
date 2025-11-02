@@ -33,25 +33,42 @@ export default function SearchPage() {
     const usersRef = collection(db, "users");
     const term = searchTerm.toLowerCase().trim();
 
-    const qName = query(usersRef, where("name", ">=", term), where("name", "<=", term + "\uf8ff"));
-    const qUsername = query(usersRef, where("username", ">=", term), where("username", "<=", term + "\uf8ff"));
+    // Prefix search by name and username
+    const qName = query(
+      usersRef,
+      where("name", ">=", term),
+      where("name", "<=", term + "\uf8ff")
+    );
+
+    const qUsername = query(
+      usersRef,
+      where("username", ">=", term),
+      where("username", "<=", term + "\uf8ff")
+    );
+
     const qEmail = query(usersRef, where("email", "==", term));
 
-    const [snapName, snapUsername, snapEmail] = await Promise.all([getDocs(qName), getDocs(qUsername), getDocs(qEmail)]);
+    const [snapName, snapUsername, snapEmail] = await Promise.all([
+      getDocs(qName),
+      getDocs(qUsername),
+      getDocs(qEmail),
+    ]);
 
     const mergedResults: Record<string, User> = {};
 
-    [...snapName.docs, ...snapUsername.docs, ...snapEmail.docs].forEach((doc) => {
-      const data = doc.data();
-      if (doc.id !== me?.uid) {
-        mergedResults[doc.id] = {
-          uid: doc.id,
-          name: data.name,
-          username: data.username,
-          email: data.email,
-        };
+    [...snapName.docs, ...snapUsername.docs, ...snapEmail.docs].forEach(
+      (doc) => {
+        const data = doc.data();
+        if (doc.id !== me?.uid) {
+          mergedResults[doc.id] = {
+            uid: doc.id,
+            name: data.name,
+            username: data.username,
+            email: data.email,
+          };
+        }
       }
-    });
+    );
 
     setResults(Object.values(mergedResults));
     setLoading(false);
@@ -87,7 +104,9 @@ export default function SearchPage() {
           onClick={handleSearch}
           disabled={loading}
           className={`w-full sm:w-auto px-4 py-3 rounded-lg font-semibold transition ${
-            loading ? "bg-gray-600 cursor-not-allowed" : "bg-purple-600 text-white hover:bg-purple-700"
+            loading
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-purple-600 text-white hover:bg-purple-700"
           }`}
         >
           {loading ? "Searching..." : "Search"}
@@ -96,7 +115,9 @@ export default function SearchPage() {
 
       <div className="mt-4">
         {results.length === 0 && !loading && searchTerm.trim() ? (
-          <p className="text-gray-400">No users found matching &quot;{searchTerm}&quot;</p>
+          <p className="text-gray-400">
+            No users found matching &quot;{searchTerm}&quot;
+          </p>
         ) : (
           <ul className="space-y-3">
             {results.map((u) => (
@@ -105,7 +126,9 @@ export default function SearchPage() {
                 className="flex justify-between items-center border border-gray-700 p-3 rounded-lg bg-gray-800 text-gray-100 shadow-lg transition hover:bg-purple-900/50"
               >
                 <div>
-                  <div className="font-medium text-purple-300">{u.name || u.username || "No Name"}</div>
+                  <div className="font-medium text-purple-300">
+                    {u.name || u.username || "No Name"}
+                  </div>
                   <div className="text-sm text-gray-400">{u.email}</div>
                 </div>
                 <button
