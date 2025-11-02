@@ -5,12 +5,11 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MoreVertical } from "lucide-react"; // 📦 for three-dot icon
 
 export default function Navbar() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
@@ -25,145 +24,54 @@ export default function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
+  const navLinks = [
+    { name: "Chat", href: "/chat" },
+    { name: "Groups", href: "/groups" },
+    { name: "Create Group", href: "/create-group" },
+    { name: "Search", href: "/search" },
+    { name: "Friends", href: "/friends" },
+    { name: "Profile", href: "/profile" },
+    { name: "Requests", href: "/requests" },
+    { name: "Users", href: "/users" },
+  ];
+
   return (
-    <nav className="bg-gray-900 text-white px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center relative">
-      {/* Left Side */}
-      <div className="flex space-x-2 sm:space-x-4 items-center">
-        {user ? (
-          <span className="font-extrabold text-xl text-purple-400 cursor-default select-none">
-            Talksy
-          </span>
-        ) : (
-          <Link
-            href="/"
-            className="font-extrabold text-xl text-purple-400 cursor-pointer select-none"
-            style={{
-              textDecoration: "none",
-              pointerEvents: isActive("/") ? "none" : "auto",
-            }}
-          >
-            Talksy
-          </Link>
-        )}
-
-        {/* Main Navbar Links */}
-        {user && (
-          <div className="hidden sm:flex space-x-1 sm:space-x-2">
-            <Link
-              href="/chat"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/chat")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Chat
-            </Link>
-
-            <Link
-              href="/friends"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/friends")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Friends
-            </Link>
-
-            <Link
-              href="/groups"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/groups")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Groups
-            </Link>
-
-            <Link
-              href="/search"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/search")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Search
-            </Link>
-
-            <Link
-              href="/profile"
-              className={`px-3 py-1 rounded-lg transition text-sm ${
-                isActive("/profile")
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "hover:bg-purple-600/40"
-              }`}
-            >
-              Profile
-            </Link>
-
-            {/* Three Dots Dropdown Trigger */}
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="px-2 py-1 rounded-lg hover:bg-purple-600/40 transition"
-              >
-                <MoreVertical size={18} />
-              </button>
-
-              {/* Dropdown Menu */}
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 bg-gray-800 border border-gray-700 rounded-lg shadow-lg w-40 z-20">
-                  <Link
-                    href="/requests"
-                    className={`block px-4 py-2 text-sm rounded-t-lg ${
-                      isActive("/requests")
-                        ? "bg-purple-600 text-white font-semibold"
-                        : "hover:bg-purple-600/40"
-                    }`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Requests
-                  </Link>
-
-                  <Link
-                    href="/users"
-                    className={`block px-4 py-2 text-sm rounded-b-lg ${
-                      isActive("/users")
-                        ? "bg-purple-600 text-white font-semibold"
-                        : "hover:bg-purple-600/40"
-                    }`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Users
-                  </Link>
-
-                  <Link
-                    href="/create-group"
-                    className={`block px-4 py-2 text-sm ${
-                      isActive("/create-group")
-                        ? "bg-purple-600 text-white font-semibold"
-                        : "hover:bg-purple-600/40"
-                    }`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Create Group
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+    <nav className="bg-gray-900 text-white px-4 sm:px-6 py-3 flex justify-between items-center relative">
+      {/* Logo / App name */}
+      <div className="flex items-center space-x-2">
+        <Link
+          href="/"
+          className="font-extrabold text-xl text-purple-400 select-none"
+        >
+          Talksy
+        </Link>
       </div>
 
-      {/* Right Side */}
-      <div className="flex space-x-2 mt-2 sm:mt-0">
+      {/* Desktop Links */}
+      {user && (
+        <div className="hidden md:flex space-x-2">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-3 py-1 rounded-lg transition text-sm ${
+                isActive(link.href)
+                  ? "bg-purple-600 text-white font-semibold"
+                  : "hover:bg-purple-600/40"
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Auth buttons */}
+      <div className="hidden sm:flex space-x-2">
         {user ? (
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 px-3 sm:px-4 py-1 rounded-lg transition text-sm"
+            className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded-lg transition text-sm"
           >
             Logout
           </button>
@@ -173,7 +81,7 @@ export default function Navbar() {
               href="/login"
               className={`px-3 py-1 rounded-lg transition text-sm ${
                 isActive("/login")
-                  ? "bg-purple-600 text-white font-semibold cursor-default"
+                  ? "bg-purple-600 text-white font-semibold"
                   : "hover:bg-purple-600/40"
               }`}
             >
@@ -183,7 +91,7 @@ export default function Navbar() {
               href="/signup"
               className={`px-3 py-1 rounded-lg transition text-sm ${
                 isActive("/signup")
-                  ? "bg-purple-600 text-white font-semibold cursor-default"
+                  ? "bg-purple-600 text-white font-semibold"
                   : "hover:bg-purple-600/40"
               }`}
             >
@@ -193,61 +101,80 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Mobile Menu */}
-      {user && (
-        <div className="flex flex-wrap sm:hidden justify-center w-full space-x-2 mt-3">
-          <Link
-            href="/chat"
-            className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/chat")
-                ? "bg-purple-600 text-white font-semibold"
-                : "hover:bg-purple-600/40"
-            }`}
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="md:hidden bg-purple-600 px-3 py-1 rounded-lg text-sm"
+      >
+        {menuOpen ? "✖" : "☰"}
+      </button>
+
+      {/* Sliding Menu (Mobile) */}
+      <div
+        className={`fixed top-0 left-0 h-full w-2/3 bg-gray-800 text-white transform ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out p-6 md:hidden z-50`}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-xl font-bold text-purple-400">Talksy</span>
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="text-white text-2xl font-bold"
           >
-            Chat
-          </Link>
-          <Link
-            href="/friends"
-            className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/friends")
-                ? "bg-purple-600 text-white font-semibold"
-                : "hover:bg-purple-600/40"
-            }`}
-          >
-            Friends
-          </Link>
-          <Link
-            href="/groups"
-            className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/groups")
-                ? "bg-purple-600 text-white font-semibold"
-                : "hover:bg-purple-600/40"
-            }`}
-          >
-            Groups
-          </Link>
-          <Link
-            href="/profile"
-            className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/profile")
-                ? "bg-purple-600 text-white font-semibold"
-                : "hover:bg-purple-600/40"
-            }`}
-          >
-            Profile
-          </Link>
-          <Link
-            href="/create-group"
-            className={`px-3 py-1 rounded-lg transition text-sm ${
-              isActive("/create-group")
-                ? "bg-purple-600 text-white font-semibold"
-                : "hover:bg-purple-600/40"
-            }`}
-          >
-            Create Group
-          </Link>
+            ×
+          </button>
         </div>
-      )}
+
+        {user ? (
+          <>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`block px-3 py-2 rounded-lg mb-2 transition ${
+                  isActive(link.href)
+                    ? "bg-purple-600 text-white font-semibold"
+                    : "hover:bg-purple-600/40"
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg transition mt-4"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className={`block px-3 py-2 rounded-lg mb-2 transition ${
+                isActive("/login")
+                  ? "bg-purple-600 text-white font-semibold"
+                  : "hover:bg-purple-600/40"
+              }`}
+            >
+              Login
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMenuOpen(false)}
+              className={`block px-3 py-2 rounded-lg transition ${
+                isActive("/signup")
+                  ? "bg-purple-600 text-white font-semibold"
+                  : "hover:bg-purple-600/40"
+              }`}
+            >
+              Signup
+            </Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }
