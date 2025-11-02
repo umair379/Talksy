@@ -54,11 +54,16 @@ setUsers(data);
   }, []);
 
   return (
-    <div className="p-8">
-      <h2 className="text-2xl font-bold mb-4 text-blue-600">Select a User to Chat</h2>
+    // 📱 Responsiveness: Mobile par kam padding (p-4), laptop par zyada (sm:p-8)
+    <div className="p-4 sm:p-8">
+      {/* 🎨 Theme Change: Purple heading aur dark border */}
+      <h2 className="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-700 pb-2">
+        Select a User to Chat
+      </h2>
 
       {users.length === 0 ? (
-        <p className="text-gray-600">No users found 😕</p>
+        // 🎨 Theme Change: Dark background ke liye light grey text
+        <p className="text-gray-400">No users found 😕</p>
       ) : (
         <ul className="space-y-3">
           {users
@@ -67,9 +72,26 @@ setUsers(data);
               <li
                 key={user.uid}
                 onClick={() => router.push(`/chat/${user.uid}`)}
-                className="p-3 bg-gray-100 rounded cursor-pointer hover:bg-blue-100"
+                // 🎨 Theme Change & 📱 Responsiveness: Dark background, light text, purple hover
+                className="p-3 bg-gray-800 text-gray-100 rounded-lg cursor-pointer transition hover:bg-purple-900 border border-gray-700 shadow-md"
               >
-                {user.email}
+                <div className="flex justify-between items-center">
+                    {/* Display Name (if available) or Email, with purple highlight */}
+                    <span className="font-medium text-lg text-purple-200">
+                        {user.name || user.email}
+                    </span>
+                    {/* Email chota aur side mein dikhega */}
+                    <span className="text-xs text-gray-400">
+                        {user.name && user.email}
+                    </span>
+                </div>
+                {user.about && (
+                    // 📱 Responsiveness: About section mobile par chhupaya ja sakta hai ya chota font use hoga
+                    <p className="text-sm text-gray-400 mt-1 hidden sm:block">
+                        {/* Hidden on extra small screen, block on small and up (for better mobile list) */}
+                        {user.about}
+                    </p>
+                )}
               </li>
             ))}
         </ul>
