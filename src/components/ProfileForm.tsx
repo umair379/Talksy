@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { User as FirebaseUser } from "firebase/auth";
 import Image from "next/image";
 
 export default function ProfileForm() {
