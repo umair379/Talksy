@@ -1,5 +1,4 @@
 "use client";
-import type { User as FirebaseUser } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
