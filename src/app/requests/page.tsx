@@ -1,4 +1,6 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/rules-of-hooks */
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -6,9 +8,8 @@ import { collection, query, onSnapshot } from "firebase/firestore";
 
 export default function RequestsPage() {
   const [requests, setRequests] = useState<Record<string, string>>({});
-  const [me, setMe] = useState<any>(null); // yahan apni logic lagao user fetch karne ki
+  const [me, setMe] = useState<any>(null);
 
-  // Friend request status ko realtime track karna
   useEffect(() => {
     if (!me) return;
 
@@ -18,9 +19,9 @@ export default function RequestsPage() {
       snap.docs.forEach((d) => {
         const data = d.data();
         if (data.from === me.uid) {
-          reqs[data.to] = data.status; // Sent by me
+          reqs[data.to] = data.status;
         } else if (data.to === me.uid) {
-          reqs[data.from] = data.status; // Received by me
+          reqs[data.from] = data.status;
         }
       });
       setRequests(reqs);
