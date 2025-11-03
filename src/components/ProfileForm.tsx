@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+console.log("ProfileForm refreshed");
 
 export default function ProfileForm() {
   const [name, setName] = useState("");
